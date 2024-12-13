@@ -52,9 +52,9 @@ $notifications_latest = optional($notifications)->take(5);
         </li>
 
         @php
-            $module_name = "posts";
-            $text = __("Posts");
-            $icon = "fa-regular fa-file-lines";
+            $module_name = "lsps";
+            $text = __("LSP");
+            $icon = "fa-solid fa-diagram-project";
             $permission = "view_" . $module_name;
             $url = route("backend." . $module_name . ".index");
         @endphp
@@ -65,16 +65,6 @@ $notifications_latest = optional($notifications)->take(5);
             $module_name = "categories";
             $text = __("Categories");
             $icon = "fa-solid fa-diagram-project";
-            $permission = "view_" . $module_name;
-            $url = route("backend." . $module_name . ".index");
-        @endphp
-
-        <x-backend.sidebar-nav-item :permission="$permission" :url="$url" :icon="$icon" :text="$text" />
-
-        @php
-            $module_name = "tags";
-            $text = __("Tags");
-            $icon = "fa-solid fa-tags";
             $permission = "view_" . $module_name;
             $url = route("backend." . $module_name . ".index");
         @endphp

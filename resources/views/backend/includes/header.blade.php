@@ -16,7 +16,7 @@ $notifications_latest = optional($notifications)->take(5);
         </button>
         <ul class="header-nav d-none d-lg-flex">
             <li class="nav-item">
-                <a class="nav-link" href="{{ route("frontend.index") }}" target="_blank">
+                <a class="nav-link" href="{{ route("backend.home") }}" target="_blank">
                     {{ app_name() }}&nbsp;
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>

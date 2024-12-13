@@ -331,24 +331,7 @@
                 <x-frontend.nav-item :active="request()->routeIs('home')">
                     {{ __("Home") }}
                 </x-frontend.nav-item>
-                <x-frontend.nav-item
-                    :href="route('frontend.posts.index')"
-                    :active="request()->routeIs('frontend.posts.*')"
-                >
-                    {{ __("Posts") }}
-                </x-frontend.nav-item>
-                <x-frontend.nav-item
-                    :href="route('frontend.categories.index')"
-                    :active="request()->routeIs('frontend.categories.*')"
-                >
-                    {{ __("Categories") }}
-                </x-frontend.nav-item>
-                <x-frontend.nav-item
-                    :href="route('frontend.tags.index')"
-                    :active="request()->routeIs('frontend.tags.*')"
-                >
-                    {{ __("Tags") }}
-                </x-frontend.nav-item>
+
                 <x-frontend.nav-item href="https://nasirkhn.com" target="_blank">
                     {{ __("Contact") }}
                 </x-frontend.nav-item>
