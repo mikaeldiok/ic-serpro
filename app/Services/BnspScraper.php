@@ -12,31 +12,155 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class BnspScraper
 {
+    public function scrapeAllPages()
+    {
+        $currentPage = 1;
+
+        while (true) {
+            echo "Scraping page {$currentPage}...\n";
+
+            $baseUrl = "https://bnsp.go.id/lsp?hal={$currentPage}";
+
+            try {
+                $response = Http::retry(5, 5000)->get($baseUrl);
+
+                if ($response->status() !== 200) {
+                    throw new \Exception("Failed to fetch the page. Status code: {$response->status()}");
+                }
+
+                $crawler = new Crawler($response->body());
+
+                $titles = $crawler->filter('h4.trending__title a');
+
+                if ($titles->count() === 0) {
+                    echo "No titles found on page {$currentPage}. Stopping scrape.\n";
+                    break;
+                }
+
+                $titles->each(function (Crawler $node) {
+                    $detailUrl = $node->attr('href');
+                    $encryptedId = basename($detailUrl);
+
+                    $this->scrapeDetailPage($detailUrl, $encryptedId);
+                });
+
+                $currentPage++;
+
+            } catch (\Exception $e) {
+                echo "Error scraping page {$currentPage}: " . $e->getMessage() . "\n";
+                break;
+            }
+        }
+
+        echo "Scraping completed.\n";
+    }
+
+    public function checkNewLspAllPages()
+    {
+        $currentPage = 1;
+
+        while (true) {
+            echo "Checking page {$currentPage} for updates...\n";
+
+            $baseUrl = "https://bnsp.go.id/lsp?hal={$currentPage}";
+
+            try {
+                $response = Http::retry(5, 5000)->get($baseUrl);
+
+                if ($response->status() !== 200) {
+                    throw new \Exception("Failed to fetch the page. Status code: {$response->status()}");
+                }
+
+                $crawler = new Crawler($response->body());
+
+                $titles = $crawler->filter('h4.trending__title a');
+
+                if ($titles->count() === 0) {
+                    echo "No more pages to process. Scraping completed.\n";
+                    break;
+                }
+
+                $titles->each(function (Crawler $node) {
+                    $detailUrl = $node->attr('href');
+                    $encryptedId = basename($detailUrl);
+
+                    $name = $node->text();
+
+                    // echo "Checking LSP by name: {$name}...\n";
+
+                    $lsp = Lsp::where('name', $name)->first();
+
+                    if ($lsp) {
+                        // echo "Skipping already existing LSP with name: {$name} and ID: {$lsp->id}\n";
+                        return;
+                    }
+
+                    // echo "Scraping new LSP with name: {$name} and encrypted ID: {$encryptedId}...\n";
+
+                    $this->scrapeDetailPage($detailUrl, $encryptedId);
+                });
+
+
+                $currentPage++;
+            } catch (\Exception $e) {
+                echo "Error checking page {$currentPage}: " . $e->getMessage() . "\n";
+                break;
+            }
+        }
+
+        echo "Check and update process completed.\n";
+    }
+
     public function scrapePage($hal)
     {
         $baseUrl = "https://bnsp.go.id/lsp?hal={$hal}";
-        $response = Http::get($baseUrl);
 
-        if ($response->status() !== 200) {
-            throw new \Exception("Failed to fetch the page. Status code: {$response->status()}");
+        try {
+            $response = Http::retry(5, 5000)->get($baseUrl);
+
+            if ($response->status() !== 200) {
+                throw new \Exception("Failed to fetch the page. Status code: {$response->status()}");
+            }
+
+            $crawler = new Crawler($response->body());
+
+            $crawler->filter('h4.trending__title a')->each(function (Crawler $node) {
+                $detailUrl = $node->attr('href');
+                $encryptedId = basename($detailUrl);
+
+                $this->scrapeDetailPage($detailUrl, $encryptedId);
+            });
+        } catch (\Exception $e) {
+            echo "Error scraping page {$hal}: " . $e->getMessage();
         }
-
-        $crawler = new Crawler($response->body());
-
-        $crawler->filter('h4.trending__title a')->each(function (Crawler $node) {
-            $detailUrl = $node->attr('href');
-            $encryptedId = basename($detailUrl);
-
-            $this->scrapeDetailPage($detailUrl, $encryptedId);
-        });
     }
+
 
     public function scrapeDetailPage($url, $encryptedId)
     {
-        $response = Http::get($url);
+        $attempts = 0;
+        $maxAttempts = 5;
+        $response = null;
 
-        if ($response->status() !== 200) {
-            throw new \Exception("Failed to fetch detail page: {$url}");
+        while ($attempts < $maxAttempts) {
+            try {
+                $response = Http::get($url);
+
+                if ($response->status() === 200) {
+                    break;
+                }
+
+                throw new \Exception("Failed to fetch detail page: {$url}. Status code: {$response->status()}");
+            } catch (\Exception $e) {
+                $attempts++;
+                echo "\nAttempt {$attempts} failed: {$e->getMessage()}";
+
+                if ($attempts >= $maxAttempts) {
+                    echo "\nMax retry attempts reached for URL: {$url}. Skipping...\n";
+                    return;
+                }
+                sleep(2);
+            }
         }
 
         $crawler = new Crawler($response->body());
@@ -96,12 +220,18 @@ class BnspScraper
 
     protected function scrapeSkemas($crawler, $lspId)
     {
-        $skemas = [];
+        $skemaRows = $crawler->filter('#skema table tr');
+        if ($skemaRows->count() === 0) {
+            return;
+        }
 
-        $crawler->filter('#skema table tr')->each(function ($node, $index) use ($lspId, &$skemas) {
-            if ($index === 0) return;
+        $skemas = [];
+        $skemaRows->each(function ($node, $index) use ($lspId, &$skemas) {
+            if ($index === 0) return; // Skip header row
 
             $columns = $node->filter('td');
+            if ($columns->count() < 3) return; // Ensure there are enough columns
+
             $onclick = $columns->eq(2)->filter('span')->attr('onclick');
             preg_match("/fetchDataUnitSkema\('.*?',\s*'(\d+)'\)/", $onclick, $matches);
             $skemaId = $matches[1] ?? null;
@@ -109,8 +239,8 @@ class BnspScraper
             if ($skemaId) {
                 $skemas[] = [
                     'lsp_id' => $lspId,
-                    'order' => trim($columns->eq(0)->text()),
-                    'name' => trim($columns->eq(1)->text()),
+                    'order' => trim($columns->eq(0)->text() ?? ''),
+                    'name' => trim($columns->eq(1)->text() ?? ''),
                     'skema_id' => $skemaId,
                 ];
             }
@@ -132,31 +262,39 @@ class BnspScraper
     protected function fetchSkemaUnits($skemaId, $lspSkemaId)
     {
         $url = "https://bnsp.go.id/lsp/unit-skema/{$skemaId}";
-        $response = Http::get($url);
 
-        if ($response->status() !== 200) {
-            throw new \Exception("Failed to fetch units for Skema ID: {$skemaId}");
-        }
+        try {
+            $response = Http::retry(3, 5000)->get($url);
 
-        $data = $response->json();
-        $units = $data['units'] ?? [];
+            $data = $response->json();
+            $units = $data['units'] ?? [];
 
-        foreach ($units as $index => $unit) {
-            LspSkemaUnit::updateOrCreate(
-                [
-                    'skema_id' => $lspSkemaId,
-                    'unit_code' => $unit['kodeunit'],
-                ],
-                [
-                    'order' => $index + 1,
-                    'name' => $unit['keterangan'],
-                ]
-            );
+            foreach ($units as $index => $unit) {
+                LspSkemaUnit::updateOrCreate(
+                    [
+                        'skema_id' => $lspSkemaId,
+                        'unit_code' => $unit['kodeunit'],
+                    ],
+                    [
+                        'order' => $index + 1,
+                        'name' => $unit['keterangan'],
+                    ]
+                );
+            }
+
+        } catch (\Exception $e) {
+            echo "Error fetching units for Skema ID {$skemaId}: " . $e->getMessage();
         }
     }
 
+
     protected function scrapeAsesors($crawler, $lspId)
     {
+        $rows = $crawler->filter('#asesor table tr');
+        if ($rows->count() === 0) {
+            return;
+        }
+
         $crawler->filter('#asesor table tr')->each(function ($node, $index) use ($lspId) {
             if ($index === 0) return;
 
@@ -177,6 +315,11 @@ class BnspScraper
 
     protected function scrapeTuks($crawler, $lspId)
     {
+        $rows = $crawler->filter('#tuk table tr');
+        if ($rows->count() === 0) {
+            return;
+        }
+
         $crawler->filter('#tuk table tr')->each(function ($node, $index) use ($lspId) {
             if ($index === 0) return;
 
