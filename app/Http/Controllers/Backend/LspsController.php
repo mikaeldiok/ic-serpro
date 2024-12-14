@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Backend;
 
 use App\Authorizable;
 use App\Http\Controllers\Backend\BackendBaseController;
+use App\Models\Lsp;
+use App\Services\BnspScraper;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -180,6 +182,22 @@ class LspsController extends BackendBaseController
         logUserAccess($module_title . ' ' . $module_action . ' | Id: ' . $$module_name_singular->id);
 
         return redirect()->route("backend.{$module_name}.show", $$module_name_singular->id);
+    }
+    public function updateLspDataAjax(Request $request, $id)
+    {
+        $lsp = Lsp::findOrFail($id);
+
+        $encryptedId = $lsp->encrypted_id;
+
+        $bnspService = app(BnspScraper::class);
+
+        try {
+            $bnspService->scrapeDetailPage("https://bnsp.go.id/lsp/{$encryptedId}", $encryptedId);
+
+            return response()->json(['success' => true, 'message' => 'LSP data updated successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to update LSP data: ' . $e->getMessage()]);
+        }
     }
 
 }

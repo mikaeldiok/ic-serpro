@@ -16,9 +16,19 @@
 @section("content")
 <div class="card">
     <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-2 col-12">
+                <button id="updateLspDataBtn" class="btn btn-primary">Update LSP Data</button>
+            </div>
+        </div>
         <div class="row mb-2">
-            <h3>Profile LSP</h3>
-            <hr>
+            <h3 class="d-inline">
+                Profile LSP
+                <span class="fs-6 ms-2">
+                    <a class="text-sm" target="_blank" href="https://bnsp.go.id/lsp/{{ $lsp->encrypted_id }}"><i class="fas fa-link"></i> source</a>
+                </span>
+            </h3>
+        <hr>
         </div>
         <div class="row">
             <div class="col-md-3">
@@ -176,7 +186,8 @@
 
         <div class="row mt-4" id="skemaSection">
             <div class="col-12">
-
+                <h5  id="tukSection">Skema List</h5>
+                <hr>
                 <div class="overflow-auto" style="max-height: 2400px;">
                     <table class="table table-sm table-bordered">
                         <thead>
@@ -232,3 +243,43 @@
     </div>
 </div>
 @endsection
+
+@push('after-scripts')
+<script>
+    $(document).ready(function () {
+        $('#updateLspDataBtn').on('click', function () {
+            const button = $(this);
+            const lspId = {{ $lsp->id }};
+            const url = '{{ route("backend.lsps.updateLspDataAjax", ":id") }}'.replace(':id', lspId);
+
+            // Disable button and show loading state with spinner
+            button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload(); // Reload page to reflect updated data
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert('An error occurred while updating the LSP data.');
+                    console.error(error);
+                },
+                complete: function () {
+                    // Re-enable button and reset text
+                    button.prop('disabled', false).html('Update LSP Data');
+                }
+            });
+        });
+    });
+</script>
+@endpush
+

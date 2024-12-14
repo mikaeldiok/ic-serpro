@@ -17,7 +17,7 @@ class BnspScraper
         $currentPage = 1;
 
         while (true) {
-            echo "Scraping page {$currentPage}...\n";
+            // echo "Scraping page {$currentPage}...\n";
 
             $baseUrl = "https://bnsp.go.id/lsp?hal={$currentPage}";
 
@@ -33,7 +33,7 @@ class BnspScraper
                 $titles = $crawler->filter('h4.trending__title a');
 
                 if ($titles->count() === 0) {
-                    echo "No titles found on page {$currentPage}. Stopping scrape.\n";
+                    // echo "No titles found on page {$currentPage}. Stopping scrape.\n";
                     break;
                 }
 
@@ -47,12 +47,12 @@ class BnspScraper
                 $currentPage++;
 
             } catch (\Exception $e) {
-                echo "Error scraping page {$currentPage}: " . $e->getMessage() . "\n";
+                // echo "Error scraping page {$currentPage}: " . $e->getMessage() . "\n";
                 break;
             }
         }
 
-        echo "Scraping completed.\n";
+        // echo "Scraping completed.\n";
     }
 
     public function checkNewLspAllPages()
@@ -60,7 +60,7 @@ class BnspScraper
         $currentPage = 1;
 
         while (true) {
-            echo "Checking page {$currentPage} for updates...\n";
+            // echo "Checking page {$currentPage} for updates...\n";
 
             $baseUrl = "https://bnsp.go.id/lsp?hal={$currentPage}";
 
@@ -76,7 +76,7 @@ class BnspScraper
                 $titles = $crawler->filter('h4.trending__title a');
 
                 if ($titles->count() === 0) {
-                    echo "No more pages to process. Scraping completed.\n";
+                    // echo "No more pages to process. Scraping completed.\n";
                     break;
                 }
 
@@ -103,12 +103,12 @@ class BnspScraper
 
                 $currentPage++;
             } catch (\Exception $e) {
-                echo "Error checking page {$currentPage}: " . $e->getMessage() . "\n";
+                // echo "Error checking page {$currentPage}: " . $e->getMessage() . "\n";
                 break;
             }
         }
 
-        echo "Check and update process completed.\n";
+        // echo "Check and update process completed.\n";
     }
 
     public function scrapePage($hal)
@@ -131,7 +131,7 @@ class BnspScraper
                 $this->scrapeDetailPage($detailUrl, $encryptedId);
             });
         } catch (\Exception $e) {
-            echo "Error scraping page {$hal}: " . $e->getMessage();
+            // echo "Error scraping page {$hal}: " . $e->getMessage();
         }
     }
 
@@ -168,7 +168,7 @@ class BnspScraper
         $nameNode = $crawler->filter('.page__title');
         $name = $nameNode->count() > 0 ? $nameNode->text() : null;
 
-        echo "\nExtracting: ".$name."... ";
+        // echo "\nExtracting: ".$name."... ";
 
         $profileData = [];
         $crawler->filter('.product__wrapper table tr')->each(function (Crawler $node) use (&$profileData) {
@@ -215,7 +215,7 @@ class BnspScraper
         $this->scrapeSkemas($crawler, $lsp->id);
         $this->scrapeAsesors($crawler, $lsp->id);
         $this->scrapeTuks($crawler, $lsp->id);
-        echo "Done!";
+        // echo "Done!";
     }
 
     protected function scrapeSkemas($crawler, $lspId)
@@ -283,7 +283,7 @@ class BnspScraper
             }
 
         } catch (\Exception $e) {
-            echo "Error fetching units for Skema ID {$skemaId}: " . $e->getMessage();
+            // echo "Error fetching units for Skema ID {$skemaId}: " . $e->getMessage();
         }
     }
 
