@@ -39,7 +39,7 @@ $notifications_latest = optional($notifications)->take(5);
                 @lang("Dashboard")
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link" href="{{ route("backend.notifications.index") }}">
                 <i class="nav-icon fa-regular fa-bell"></i>
                 &nbsp;
@@ -49,19 +49,23 @@ $notifications_latest = optional($notifications)->take(5);
                     <span class="badge badge-sm bg-info ms-auto">{{ $notifications_count }}</span>
                 @endif
             </a>
+        </li> --}}
+
+        <li class="nav-title">
+            Data
         </li>
 
         @php
             $module_name = "lsps";
             $text = __("LSP");
-            $icon = "fa-solid fa-diagram-project";
+            $icon = "fa-solid fa-user-tie";
             $permission = "view_" . $module_name;
             $url = route("backend." . $module_name . ".index");
         @endphp
 
         <x-backend.sidebar-nav-item :permission="$permission" :url="$url" :icon="$icon" :text="$text" />
 
-        @php
+        {{-- @php
             $module_name = "categories";
             $text = __("Categories");
             $icon = "fa-solid fa-diagram-project";
@@ -69,8 +73,11 @@ $notifications_latest = optional($notifications)->take(5);
             $url = route("backend." . $module_name . ".index");
         @endphp
 
-        <x-backend.sidebar-nav-item :permission="$permission" :url="$url" :icon="$icon" :text="$text" />
+        <x-backend.sidebar-nav-item :permission="$permission" :url="$url" :icon="$icon" :text="$text" /> --}}
 
+        <li class="nav-title">
+            Misc
+        </li>
         @php
             $module_name = "settings";
             $text = __("Settings");

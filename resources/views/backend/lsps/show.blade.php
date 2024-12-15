@@ -204,7 +204,7 @@
                                     <td>{{ $skema->name }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#unitsCollapse{{ $skema->id }}" aria-expanded="false" aria-controls="unitsCollapse{{ $skema->id }}">
-                                            View Units
+                                            View ({{ $skema->units->count() }})
                                         </button>
                                     </td>
                                 </tr>

@@ -31,7 +31,7 @@ class LspsController extends BackendBaseController
         $this->module_model = "App\Models\Lsp";
     }
 
-    public function index_data(): JsonResponse
+    public function index()
     {
         $module_title = $this->module_title;
         $module_name = $this->module_name;
@@ -42,25 +42,81 @@ class LspsController extends BackendBaseController
 
         $module_action = 'List';
 
-        $page_heading = label_case($module_title);
-        $title = $page_heading.' '.label_case($module_action);
+        $$module_name = $module_model::paginate(15);
 
-        // $$module_name = $module_model::select('id', 'name','jenis','no_telp','no_hp','no_fax','no_lisensi','email','website','status_lisensi','logo_image');
-        $$module_name = $module_model::query();
+        logUserAccess($module_title.' '.$module_action);
 
-        $data = $$module_name;
+        return view(
+            "{$module_path}.{$module_name}.index_datatable",
+            compact('module_title', 'module_name', "{$module_name}", 'module_icon', 'module_name_singular', 'module_action')
+        );
+    }
+    public function index_data()
+    {
+        $module_model = $this->module_model;
+        $query = $module_model::withCount("skemas", "tuks", "asesors");
 
-        return DataTables::of($$module_name)
+        $request = request();
+
+        // Filter by Jenis
+        if ($request->filled('jenis')) {
+            $query->whereIn('jenis', $request->input('jenis'));
+        }
+
+        // Filter by Status Lisensi
+        if ($request->filled('status_lisensi')) {
+            $query->whereIn('status_lisensi', $request->input('status_lisensi'));
+        }
+
+        // Filter by Alamat
+        if ($request->filled('alamat')) {
+            $query->where('alamat', 'LIKE', '%' . $request->input('alamat') . '%');
+        }
+
+        // Valid operators
+        $validOperators = ['=', '<', '<=', '>', '>='];
+
+        // Filter by Skema Count using HAVING
+        if ($request->filled('skema_count_value')) {
+            $operator = $request->input('skema_count_operator', '=');
+            if (!in_array($operator, $validOperators)) {
+                $operator = '=';
+            }
+            $query->having('skemas_count', $operator, $request->input('skema_count_value'));
+        }
+
+        // Filter by TUK Count using HAVING
+        if ($request->filled('tuk_count_value')) {
+            $operator = $request->input('tuk_count_operator', '=');
+            if (!in_array($operator, $validOperators)) {
+                $operator = '=';
+            }
+            $query->having('tuks_count', $operator, $request->input('tuk_count_value'));
+        }
+
+        // Filter by Asesor Count using HAVING
+        if ($request->filled('asesor_count_value')) {
+            $operator = $request->input('asesor_count_operator', '=');
+            if (!in_array($operator, $validOperators)) {
+                $operator = '=';
+            }
+            $query->having('asesors_count', $operator, $request->input('asesor_count_value'));
+        }
+
+        // Return DataTables response
+        return DataTables::of($query)
             ->addColumn('action', function ($data) {
                 $module_name = $this->module_name;
-
                 return view('backend.includes.action_column', compact('module_name', 'data'));
             })
-            ->editColumn('name', '<strong>{{$name}}</strong>')
+            ->editColumn('name', function ($data) {
+                return '<strong>' . e($data->name) . '</strong>';
+            })
             ->rawColumns(['name', 'action'])
-            ->orderColumns(['id'], '-:column $1')
             ->make(true);
     }
+
+
 
     public function store(Request $request)
     {
