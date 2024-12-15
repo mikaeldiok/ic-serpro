@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="{{ str_replace("_", "-", app()->currentLocale()) }}" dir="{{ language_direction() }}">
     <head>
@@ -28,6 +29,39 @@
             body {
                 font-family: Ubuntu, 'Noto Sans Bengali UI', Arial, Helvetica, sans-serif;
             }
+
+            <style>
+                .select2-container--default .select2-selection--single {
+                    background-color: #343a40;
+                    color: #fff;
+                    border: 1px solid #495057;
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__placeholder {
+                    color: #adb5bd;
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__rendered {
+                    color: #fff;
+                }
+
+                .select2-container--default .select2-selection--single .select2-selection__arrow {
+                    color: #fff;
+                }
+
+                .select2-container--default .select2-results__option {
+                    background-color: #343a40;
+                    color: #fff;
+                }
+
+                .select2-container--default .select2-results__option--highlighted {
+                    background-color: #495057;
+                    color: #fff;
+                }
+                .select2-container--default .select2-selection--multiple .select2-selection__choice__display{
+                    color: #000;
+                }
+            </style>
         </style>
 
         @stack("after-styles")

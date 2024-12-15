@@ -168,6 +168,26 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="filterStatusFu" class="form-label">Status Followup</label>
+                                    <select id="filterStatusFu" class="form-select select2" multiple  placeholder="all">
+                                        @foreach ($statuses as $id=>$status)
+                                            <option value="{{ $id }}">{{ $status }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="filterStatusFuColor" class="form-label">Status Color</label>
+                                    <select id="filterStatusFuColor" class="form-select select2" multiple placeholder="all">
+                                        @foreach ($status_colors as $color=>$color_name)
+                                            <option value="{{ $color }}">
+                                                <span class="badge text-{{ $color }}">{{ $color_name }}</span>
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
                         </div>
                     </form>
@@ -200,6 +220,8 @@
                 d.status_lisensi = $('#filterStatusLisensi').val();
                 d.alamat = $('#filterAlamat').val();
                 d.name = $('#filterName').val();
+                d.status_fu = $('#filterStatusFu').val();
+                d.status_fu_color = $('#filterStatusFuColor').val();
 
                 // Pass operator and value for Skema, TUK, and Asesor counts
                 d.skema_count_operator = $('#filterSkemaCountOperator').val();
@@ -230,27 +252,30 @@
     });
 
     $('#clearFilterBtn').on('click', function () {
-        $('#filterModal').find('input, select, textarea').each(function () {
-            const element = $(this);
+        $('#filterJenis').val('');
+        $('#filterStatusLisensi').val('');
+        $('#filterStatusFuColor').val(null).trigger('change');
+        $('#filterStatusFu').val(null).trigger('change');
+        $('#filterAlamat').val('');
+        $('#filterName').val('');
 
-            if (element.is('select')) {
-                element.val(null).trigger('change');
-            } else if (element.is('input[type="text"], input[type="number"], textarea')) {
-                element.val('');
-            } else if (element.is('input[type="checkbox"], input[type="radio"]')) {
-                element.prop('checked', false);
-            }
-        });
+        $('#filterSkemaCountOperator').val('');
+        $('#filterSkemaCount').val('');
+        $('#filterTukCountOperator').val('');
+        $('#filterTukCount').val('');
+        $('#filterAsesorCountOperator').val('');
+        $('#filterAsesorCount').val('');
 
         table.ajax.reload();
     });
+
 
     $('#applyFilterBtn').on('click', function () {
         $('#filterModal').modal('hide');
         table.ajax.reload();
     });
 
-    $('#filterJenis, #filterStatusLisensi').select2({
+    $('#filterJenis, #filterStatusLisensi, #filterStatusFu, #filterStatusFuColor').select2({
         placeholder: 'All',
         allowClear: true,
         width: '100%',
@@ -258,13 +283,38 @@
     });
 
     $('#filterModal').on('shown.bs.modal', function () {
-        $('#filterJenis, #filterStatusLisensi').select2({
+        $('#filterJenis, #filterStatusLisensi, #filterStatusFu, #filterStatusFuColor').select2({
             placeholder: 'All',
             allowClear: true,
             width: '100%',
             dropdownParent: $(this)
         });
     });
+
+    $(document).ready(function () {
+        $('#filterStatusFuColor').select2({
+            templateResult: function (data) {
+                if (!data.id) {
+                    return data.text; // Default rendering for placeholder or empty values
+                }
+                // Create the badge for dropdown items
+                let colorClass = data.id; // Use the value as the class (e.g., primary, success)
+                return $('<span class="badge bg-' + colorClass + '">' + data.text + '</span>');
+            },
+            templateSelection: function (data) {
+                if (!data.id) {
+                    return data.text; // Default rendering for placeholder or empty values
+                }
+                // Create the badge for selected items
+                let colorClass = data.id; // Use the value as the class (e.g., primary, success)
+                return $('<span class="badge bg-' + colorClass + '">' + data.text + '</span>');
+            },
+            escapeMarkup: function (markup) {
+                return markup; // Allow HTML rendering
+            }
+        });
+    });
+
 
     $('.toggle-column').each(function() {
         let column = table.column($(this).attr('data-column'));

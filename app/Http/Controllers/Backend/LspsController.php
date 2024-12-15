@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Authorizable;
 use App\Http\Controllers\Backend\BackendBaseController;
 use App\Models\Lsp;
+use App\Models\Status;
 use App\Services\BnspScraper;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -43,12 +44,20 @@ class LspsController extends BackendBaseController
         $module_action = 'List';
 
         $$module_name = $module_model::paginate(15);
+        $statuses = Status::pluck("name","id");
+        $status_colors =[
+            "success" => "green",
+            "warning" => "yellow",
+            "danger" => "red",
+            "primary" => "blue",
+            "secondary" => "gray"
+        ];
 
         logUserAccess($module_title.' '.$module_action);
 
         return view(
             "{$module_path}.{$module_name}.index_datatable",
-            compact('module_title', 'module_name', "{$module_name}", 'module_icon', 'module_name_singular', 'module_action')
+            compact('module_title', 'module_name', "{$module_name}", 'module_icon', 'module_name_singular', 'module_action','status_colors','statuses')
         );
     }
     public function index_data()
@@ -64,6 +73,18 @@ class LspsController extends BackendBaseController
 
         if ($request->filled('jenis')) {
             $query->whereIn('jenis', $request->input('jenis'));
+        }
+
+        if ($request->filled('status_fu')) {
+            $query->whereHas('status', function ($q) use ($request) {
+                $q->whereIn('id', $request->input('status_fu'));
+            });
+        }
+
+        if ($request->filled('status_fu_color')) {
+            $query->whereHas('status', function ($q) use ($request) {
+                $q->whereIn('color', $request->input('status_fu_color'));
+            });
         }
 
         if ($request->filled('status_lisensi')) {

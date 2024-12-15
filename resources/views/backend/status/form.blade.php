@@ -35,7 +35,7 @@
             $field_lable = "Color";
             $field_placeholder = "-- Select a Color --";
             $required = "required";
-            $select_options = ["primary" => "Primary", "success" => "Success", "warning" => "Warning", "danger" => "Danger", "secondary" => "Secondary"];
+            $select_options = ["primary" => "blue", "success" => "green", "warning" => "yellow", "danger" => "red", "secondary" => "gray"];
             ?>
             {{ html()->label($field_lable, $field_name)->class("form-label") }} {!! field_required($required) !!}
             {{ html()->select($field_name, $select_options)->class("form-select")->attributes(["$required"]) }}
