@@ -102,6 +102,10 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    <label for="filterAlamat" class="form-label">Name</label>
+                                    <input type="text" id="filterName" class="form-control" placeholder="Name">
+                                </div>
+                                <div class="mb-3">
                                     <label for="filterJenis" class="form-label">Jenis</label>
                                     <select id="filterJenis" class="form-select select2" multiple>
                                         <option value="LSP Pihak Ketiga">LSP Pihak Ketiga</option>
@@ -109,18 +113,18 @@
                                         <option value="LSP Pihak Kesatu">LSP Pihak Kesatu</option>
                                     </select>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="filterStatusLisensi" class="form-label">Status Lisensi</label>
-                                    <select id="filterStatusLisensi" class="form-select select2" multiple>
-                                        <option value="Aktif">Aktif</option>
-                                        <option value="Masa Berlaku Habis">Masa Berlaku Habis</option>
-                                    </select>
-                                </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="filterAlamat" class="form-label">Alamat</label>
                                     <input type="text" id="filterAlamat" class="form-control" placeholder="Search Address">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="filterStatusLisensi" class="form-label">Status Lisensi</label>
+                                    <select id="filterStatusLisensi" class="form-select select2">
+                                        <option value="Aktif">Aktif</option>
+                                        <option value="Masa Berlaku Habis">Masa Berlaku Habis</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -195,6 +199,7 @@
                 d.jenis = $('#filterJenis').val();
                 d.status_lisensi = $('#filterStatusLisensi').val();
                 d.alamat = $('#filterAlamat').val();
+                d.name = $('#filterName').val();
 
                 // Pass operator and value for Skema, TUK, and Asesor counts
                 d.skema_count_operator = $('#filterSkemaCountOperator').val();
@@ -246,7 +251,7 @@
     });
 
     $('#filterJenis, #filterStatusLisensi').select2({
-        placeholder: 'Select options',
+        placeholder: 'All',
         allowClear: true,
         width: '100%',
         dropdownParent: $('#filterModal')
@@ -254,12 +259,24 @@
 
     $('#filterModal').on('shown.bs.modal', function () {
         $('#filterJenis, #filterStatusLisensi').select2({
-            placeholder: 'Select options',
+            placeholder: 'All',
             allowClear: true,
             width: '100%',
             dropdownParent: $(this)
         });
     });
+
+    $('.toggle-column').each(function() {
+        let column = table.column($(this).attr('data-column'));
+        $(this).prop('checked', column.visible());
+    });
+
+    $('.toggle-column').on('change', function() {
+        let column = table.column($(this).attr('data-column'));
+        column.visible(!column.visible());
+        table.columns.adjust().draw();
+    });
 </script>
+
 @endpush
 

@@ -58,17 +58,18 @@ class LspsController extends BackendBaseController
 
         $request = request();
 
-        // Filter by Jenis
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%' . $request->input('name') . '%');
+        }
+
         if ($request->filled('jenis')) {
             $query->whereIn('jenis', $request->input('jenis'));
         }
 
-        // Filter by Status Lisensi
         if ($request->filled('status_lisensi')) {
-            $query->whereIn('status_lisensi', $request->input('status_lisensi'));
+            $query->where('status_lisensi', $request->input('status_lisensi'));
         }
 
-        // Filter by Alamat
         if ($request->filled('alamat')) {
             $query->where('alamat', 'LIKE', '%' . $request->input('alamat') . '%');
         }
@@ -107,7 +108,7 @@ class LspsController extends BackendBaseController
         return DataTables::of($query)
             ->addColumn('action', function ($data) {
                 $module_name = $this->module_name;
-                return view('backend.includes.action_column', compact('module_name', 'data'));
+                return view('backend.includes.action_column_lsp', compact('module_name', 'data'));
             })
             ->editColumn('name', function ($data) {
                 return '<strong>' . e($data->name) . '</strong>';
