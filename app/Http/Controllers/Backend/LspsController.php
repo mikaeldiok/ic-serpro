@@ -183,6 +183,60 @@ class LspsController extends BackendBaseController
             compact('module_title', 'module_name', 'module_path', 'module_icon', 'module_name_singular', 'module_action', "{$module_name_singular}")
         );
     }
+ /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return Response
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function editFollowup($id)
+    {
+        $module_title = $this->module_title;
+        $module_name = $this->module_name;
+        $module_path = $this->module_path;
+        $module_icon = $this->module_icon;
+        $module_model = $this->module_model;
+        $module_name_singular = Str::singular($module_name);
+
+        $module_action = 'Edit';
+
+        $$module_name_singular = $module_model::findOrFail($id);
+
+        logUserAccess($module_title.' '.$module_action.' | Id: '.$$module_name_singular->id);
+
+        return view(
+            "{$module_path}.{$module_name}.editFollowup",
+            compact('module_title', 'module_name', 'module_path', 'module_icon', 'module_action', 'module_name_singular', "{$module_name_singular}")
+        );
+    }
+
+    public function updateFollowup(Request $request, $id)
+    {
+        $module_title = $this->module_title;
+        $module_name = $this->module_name;
+        $module_path = $this->module_path;
+        $module_icon = $this->module_icon;
+        $module_model = $this->module_model;
+        $module_name_singular = Str::singular($module_name);
+
+        $module_action = 'Update';
+
+        $validated_request = $request->validate([
+            'notes' => 'nullable|max:191',
+            'status_id' => 'nullable|max:191',
+        ]);
+
+        $$module_name_singular = $module_model::findOrFail($id);
+
+        $$module_name_singular->update($request->except('logo_image', 'logo_image_remove'));
+
+        flash(Str::singular($module_title) . "' Updated Successfully")->success()->important();
+
+        logUserAccess($module_title . ' ' . $module_action . ' | Id: ' . $$module_name_singular->id);
+
+        return redirect()->route("backend.{$module_name}.show", $$module_name_singular->id);
+    }
 
     public function update(Request $request, $id)
     {

@@ -1,9 +1,10 @@
 <div class="text-end">
     @can("edit_" . $module_name)
         <x-backend.buttons.edit
-            route='{!! route("backend.$module_name.edit", $data) !!}'
+            route='{!! route("backend.$module_name.editFollowup", $data) !!}'
             title="{{ __('Edit') }} {{ ucwords(Str::singular($module_name)) }}"
             small="true"
+            icon="fas fa-pencil"
         />
     @endcan
 

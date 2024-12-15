@@ -146,6 +146,17 @@ Route::group(['namespace' => 'App\Http\Controllers\Backend', 'prefix' => 'admin'
     Route::get("$module_name/index_data", ['as' => "$module_name.index_data", 'uses' => "$controller_name@index_data"]);
     Route::get("$module_name/trashed", ['as' => "$module_name.trashed", 'uses' => "$controller_name@trashed"]);
     Route::patch("$module_name/trashed/{id}", ['as' => "$module_name.restore", 'uses' => "$controller_name@restore"]);
+    Route::get("$module_name/editFollowup/{id}", ['as' => "$module_name.editFollowup", 'uses' => "$controller_name@editFollowup"]);
+    Route::patch("$module_name/updateFollowup/{id}", ['as' => "$module_name.updateFollowup", 'uses' => "$controller_name@updateFollowup"]);
+    Route::post("$module_name/{id}/update-ajax", ['as' => "$module_name.updateLspDataAjax", 'uses' => "$controller_name@updateLspDataAjax"]);
+    Route::resource("$module_name", "$controller_name");
+
+    $module_name = 'status';
+    $controller_name = 'StatusController';
+    Route::get("$module_name/index_list", ['as' => "$module_name.index_list", 'uses' => "$controller_name@index_list"]);
+    Route::get("$module_name/index_data", ['as' => "$module_name.index_data", 'uses' => "$controller_name@index_data"]);
+    Route::get("$module_name/trashed", ['as' => "$module_name.trashed", 'uses' => "$controller_name@trashed"]);
+    Route::patch("$module_name/trashed/{id}", ['as' => "$module_name.restore", 'uses' => "$controller_name@restore"]);
     Route::post("$module_name/{id}/update-ajax", ['as' => "$module_name.updateLspDataAjax", 'uses' => "$controller_name@updateLspDataAjax"]);
     Route::resource("$module_name", "$controller_name");
 });

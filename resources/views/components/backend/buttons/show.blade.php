@@ -10,6 +10,7 @@
     <a
         class="btn btn-info {{ $small == "true" ? "btn-sm" : "" }} {{ $class }} m-1"
         data-toggle="tooltip"
+        target="_blank"
         href="{{ $route }}"
         title="{{ $title }}"
     >

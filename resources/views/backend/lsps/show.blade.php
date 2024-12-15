@@ -31,7 +31,7 @@
         <hr>
         </div>
         <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <div class="row mb-5">
                     <div class="col-12 text-center">
                         <img src="{{ $lsp->logo_image }}" alt="{{ $lsp->name }}" class="img-fluid rounded-3 shadow-lg ">
@@ -58,8 +58,7 @@
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-9">
+            <div class="col-md-6">
                 <table class="table table-sm ">
                     <tbody>
                         <tr>
@@ -124,6 +123,28 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="col-md-4">
+                <table class="table table-sm ">
+                    <tbody>
+                        <tr>
+                            <th>status FU</th>
+                            <td>{{ $lsp->status?->name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Notes</th>
+                            <td>{{ $lsp->notes }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <x-backend.buttons.edit
+                    route='{!! route("backend.$module_name.editFollowup", $lsp) !!}'
+                    title="{{ __('Edit') }} {{ ucwords(Str::singular($module_name)) }}"
+                    small="true"
+                    icon="fas fa-pencil"
+                >
+                Edit Followup
+                </x-backend.buttons.edit>
             </div>
         </div>
 

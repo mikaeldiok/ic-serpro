@@ -65,6 +65,16 @@ $notifications_latest = optional($notifications)->take(5);
 
         <x-backend.sidebar-nav-item :permission="$permission" :url="$url" :icon="$icon" :text="$text" />
 
+        @php
+            $module_name = "status";
+            $text = __("Status");
+            $icon = "fa-solid fa-list";
+            $permission = "view_" . $module_name;
+            $url = route("backend." . $module_name . ".index");
+        @endphp
+
+        <x-backend.sidebar-nav-item :permission="$permission" :url="$url" :icon="$icon" :text="$text" />
+
         {{-- @php
             $module_name = "categories";
             $text = __("Categories");
